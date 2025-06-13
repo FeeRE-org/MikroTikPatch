@@ -304,7 +304,16 @@ def patch_squashfs(path,key_dict):
     for root, dirs, files in os.walk(path):
         for file in files:
             if file == 'loader':
-                patch_binary(os.path.join(root,file), "0fb6c05b5e", "b801000000")
+                import lief
+                crackme = lief.parse(os.path.join(root,file))
+                hook    = lief.parse("hook")
+                segment_added  = crackme.add(hook.segments[0])
+                my_memcmp      = hook.get_symbol("my_memcmp")
+                my_memcmp_addr = segment_added.virtual_address + my_memcmp.value
+                crackme.patch_pltgot('memcmp', my_memcmp_addr)
+                crackme.write(os.path.join(root,file))
+                print("patched loader")
+                # patch_binary(os.path.join(root,file), "0fb6c05b5e", "b801000000")
                 continue
             file = os.path.join(root,file)
             if os.path.isfile(file):
