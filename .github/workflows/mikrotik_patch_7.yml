@@ -323,7 +323,7 @@ jobs:
           mikrotik-${{ env.LATEST_VERSION }}${{ env.ARCH }}.iso
           routeros-${{ env.LATEST_VERSION }}${{ env.ARCH }}.npk
           all_packages-*-${{ env.LATEST_VERSION }}.zip
-          install-image-$LATEST_VERSION.zip
+          install-image*.zip
           
   Create_CSV:
     needs: Patch_RouterOS
