@@ -279,10 +279,32 @@ def patch_kernel(data:bytes,key_dict):
     else:
         raise Exception('unknown kernel format')
 
+def patch_binary(file_path, original_hex, replacement_hex):
+    original = bytes.fromhex(original_hex)
+    replacement = bytes.fromhex(replacement_hex)
+
+    if len(original) != len(replacement):
+        raise ValueError("Original and replacement patterns must be the same length")
+
+    with open(file_path, "rb") as f:
+        data = bytearray(f.read())
+
+    index = data.find(original)
+    if index == -1:
+        print("Pattern not found.")
+        return
+
+    data[index:index+len(replacement)] = replacement
+
+    with open(file_path, "wb") as f:
+        f.write(data)
+
+    print(f"Patched at offset 0x{index:X}")
 def patch_squashfs(path,key_dict):
     for root, dirs, files in os.walk(path):
         for file in files:
             if file =='loader':
+                patch_binary(file, "0fb6c05b5e", "b801000000")
                 continue
             file = os.path.join(root,file)
             if os.path.isfile(file):
@@ -292,10 +314,10 @@ def patch_squashfs(path,key_dict):
                     if _data != data:
                         open(file,'wb').write(_data)
                 url_dict = {
-                    os.environ['MIKRO_LICENCE_URL'].encode():os.environ['CUSTOM_LICENCE_URL'].encode(),
-                    os.environ['MIKRO_UPGRADE_URL'].encode():os.environ['CUSTOM_UPGRADE_URL'].encode(),
-                    os.environ['MIKRO_CLOUD_URL'].encode():os.environ['CUSTOM_CLOUD_URL'].encode(),
-                    os.environ['MIKRO_CLOUD_PUBLIC_KEY'].encode():os.environ['CUSTOM_CLOUD_PUBLIC_KEY'].encode(),
+                    # os.environ['MIKRO_LICENCE_URL'].encode():os.environ['CUSTOM_LICENCE_URL'].encode(),
+                    # os.environ['MIKRO_UPGRADE_URL'].encode():os.environ['CUSTOM_UPGRADE_URL'].encode(),
+                    # os.environ['MIKRO_CLOUD_URL'].encode():os.environ['CUSTOM_CLOUD_URL'].encode(),
+                    # os.environ['MIKRO_CLOUD_PUBLIC_KEY'].encode():os.environ['CUSTOM_CLOUD_PUBLIC_KEY'].encode(),
                 }
                 data = open(file,'rb').read()
                 for old_url,new_url in url_dict.items():
@@ -306,7 +328,7 @@ def patch_squashfs(path,key_dict):
                         
                 if os.path.split(file)[1] == 'licupgr':
                     url_dict = {
-                        os.environ['MIKRO_RENEW_URL'].encode():os.environ['CUSTOM_RENEW_URL'].encode(),
+                        # os.environ['MIKRO_RENEW_URL'].encode():os.environ['CUSTOM_RENEW_URL'].encode(),
                     }
                     for old_url,new_url in url_dict.items():
                         if old_url in data:
