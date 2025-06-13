@@ -123,9 +123,6 @@ jobs:
         
         echo "{\"arch\": \"${{ matrix.arch }}\", \"channel\": \"${{ matrix.channel }}\", \"latest_version\": \"$LATEST_VERSION\",\"build_time\": \"$BUILD_TIME\",\"patched\": \"$has_patched_npk\"}" > latest_version_${{ matrix.arch }}_${{ matrix.channel }}.json
         sudo apt-get update > /dev/null
-        apt install build-essential -y
-        apt install python3-pip -y
-        pip3 install lief
         
         
     - name: Upload artifacts
@@ -198,7 +195,6 @@ jobs:
       if: steps.get_latest.outputs.has_new_version == 'true'
       run: |
         sudo apt-get install -y mkisofs xorriso > /dev/null
-        gcc -nostdlib -nodefaultlibs -fPIC -Wl,-shared hook.c -o hook
         sudo mkdir ./iso 
         sudo mount -o loop,ro mikrotik.iso ./iso
         sudo mkdir ./new_iso
